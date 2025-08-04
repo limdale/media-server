@@ -1,0 +1,151 @@
+services:
+  gluetun:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    # line above must be uncommented to allow external containers to connect.
+    # See https://github.com/qdm12/gluetun-wiki/blob/main/setup/connect-a-container-to-gluetun.md#external-container-to-gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    ports:
+      - 8888:8888/tcp # HTTP proxy
+      - 8388:8388/tcp # Shadowsocks
+      - 8388:8388/udp # Shadowsocks
+      - 8080:8080 # qbitTorrent
+    volumes:
+      - ./gluetun:/gluetun
+    environment:
+      # See https://github.com/qdm12/gluetun-wiki/tree/main/setup#setup
+      - VPN_SERVICE_PROVIDER=${VPN_PROVIDER}
+      - VPN_TYPE=wireguard
+      #- SERVER_COUNTRIES=Netherlands
+      - VPN_PORT_FORWARDING=on
+      # OpenVPN:
+      # - OPENVPN_USER=${OPENVPN_USERNAME}
+      # - OPENVPN_PASSWORD=${OPENVPN_PASSWORD}
+      # Wireguard:
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
+      - WIREGUARD_ADDRESSES=${WIREGUARD_IP}
+      # Timezone for accurate log times
+      - TZ=${TIMEZONE}
+      # Server list updater
+      # See https://github.com/qdm12/gluetun-wiki/blob/main/setup/servers.md#update-the-vpn-servers-list
+      - UPDATER_PERIOD=
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    network_mode: "service:gluetun"
+    environment:
+      - PUID=${UID}
+      - PGID=${GID}
+      - TZ=${TIMEZONE}
+      - WEBUI_PORT=8080
+    volumes:
+      - ./qbittorrent:/config
+      - ${PATH_DOWNLOADS}:/downloads #optional
+    #ports:
+    #  - 8080:8080
+    #  - 6881:6881
+    #  - 6881:6881/udp
+    restart: unless-stopped
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    environment:
+      - PUID=${UID}
+      - PGID=${GID}
+      - TZ=${TIMEZONE}
+    volumes:
+      - ./prowlarr/config:/config
+    ports:
+      - 9696:9696
+    restart: unless-stopped
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    environment:
+      - LOG_LEVEL=info
+    ports:
+      - 8191:8191
+    restart: unless-stopped
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      - PUID=${UID}
+      - PGID=${GID}
+      - TZ=${TIMEZONE}
+    volumes:
+      - ./sonarr/config:/config
+      - ${PATH_MEDIA}/tv:/tv #optional
+      - ${PATH_DOWNLOADS}:/downloads #optional
+    ports:
+      - 8989:8989
+    restart: unless-stopped
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=${UID}
+      - PGID=${GID}
+      - TZ=${TIMEZONE}
+    volumes:
+      - ./radarr/config:/config
+      - ${PATH_MEDIA}/movies:/movies #optional
+      - ${PATH_DOWNLOADS}:/downloads #optional
+    ports:
+      - 7878:7878
+    restart: unless-stopped
+
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    environment:
+      - LOG_LEVEL=debug
+      - TZ=${TIMEZONE}
+      - PORT=5055 #optional
+    ports:
+      - 5055:5055
+    volumes:
+      - ./jellyseer/config:/app/config
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1
+      start_period: 20s
+      timeout: 3s
+      interval: 15s
+      retries: 3
+    restart: unless-stopped
+
+  jellyfin:
+    image: jellyfin/jellyfin
+    container_name: jellyfin
+    user: ${UID}:${GID}
+    network_mode: 'host'
+    volumes:
+      - ./jellyfin/config:/config
+      - ./jellyfin/cache:/cache
+      - type: bind
+        source: ${PATH_MEDIA}
+        target: /media
+      - type: bind
+        source: ./media2
+        target: /media2
+        read_only: true
+      # Optional - extra fonts to be used during transcoding with subtitle burn-in
+      #- type: bind
+      #  source: /path/to/fonts
+      #  target: /usr/local/share/fonts/custom
+      #  read_only: true
+    restart: 'unless-stopped'
+    # Optional - alternative address used for autodiscovery
+    #environment:
+    #  - JELLYFIN_PublishedServerUrl=http://example.com
+    # Optional - may be necessary for docker healthcheck to pass if running in host network mode
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
