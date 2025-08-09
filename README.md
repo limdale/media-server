@@ -7,9 +7,9 @@
     - error on already existing shows sycning with jellyfin?
 3. describe .env and config, media, downloads locations
 4. describe gluetun, openvpn setup and possibly wireguard. link gluetun test? and paste test cmd
-5. post qbittorrent changes to fix CPU usage - gluetun was crashing causing port to be reset.  needed to turn off dht, pex, local peer and limit active torrents so the device doesn't fry
+5. post qbittorrent changes to fix CPU usage - gluetun was crashing causing port to be reset.  needed to turn off dht, pex, local peer and limit active torrents so the device doesn't fry. Also added script to sync ports
 6. post future improvements
-    - wireguard
+    - wireguard - optimizations?
     - proper user ids, hardlinks
     - more env variables
     - optimize qbittorrent

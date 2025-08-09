@@ -2,12 +2,11 @@
 
 mkdir jellyfin jellyfin/config jellyfin/cache
 
-mkdir media media/tv media/movies
-mkdir media2
-
 mkdir qbittorrent
-mkdir downloads
 
 mkdir sonarr sonarr/config
+mkdir radarr radarr/config
 mkdir prowlarr prowlarr/config
 mkdir jellyseer jellyseer/config
+
+# mkdir $PATH_MEDIA/tv, $PATH_MEDIA/movies, $PATH_DOWNLOADS, media2/ on storage volume

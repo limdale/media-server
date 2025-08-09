@@ -21,6 +21,7 @@ services:
       - VPN_TYPE=wireguard
       #- SERVER_COUNTRIES=Netherlands
       - VPN_PORT_FORWARDING=on
+      - VPN_PORT_FORWARDING_STATUS_FILE=./gluetun/forwarded_port
       # OpenVPN:
       # - OPENVPN_USER=${OPENVPN_USERNAME}
       # - OPENVPN_PASSWORD=${OPENVPN_PASSWORD}
@@ -50,6 +51,10 @@ services:
     #  - 6881:6881
     #  - 6881:6881/udp
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2.5'
 
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
