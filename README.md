@@ -104,3 +104,6 @@ If everything goes well, run the `run-docker.sh` script and the app should start
 - Better security in general
 - `yt-dlp` integration
 - Usenet?
+- Bazarr for subtitles
+- Another Sonarr/Radarr instance for anime
+- Sonarr and Radarr download quality profiles
