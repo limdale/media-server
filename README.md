@@ -79,13 +79,14 @@ Copy `.env.sample` into a `.env` file and fill out the required variables.
 ## Running the app
 
 If everything goes well, run the `run-docker.sh` script and the app should start.  Once the app is running, we'll have to do some configuration on some of the running containers so they can talk to each other.  Here's a checklist on what to configure:
-- [ ] Sonarr - set qBittorrent url, set media path
-- [ ] Radarr - set qBittorrent url, set media path
+- [ ] qBittorrent - change password
+- [ ] qBittorrent - configure torrent settings
+- [ ] Sonarr - set qBittorrent url and credentials, set media path
+- [ ] Radarr - set qBittorrent url and credentials, set media path
 - [ ] Prowlarr - set qBittorrent, Sonarr, Radarr url and API keys
 - [ ] Prowlarr - add indexers
 - [ ] Jellyseer - set Jellyfin, Sonarr, Radarr urls and API keys
 - [ ] Jellyfin - finish setup wizard
-- [ ] qBittorrent - configure torrent settings
 
 ---
 
